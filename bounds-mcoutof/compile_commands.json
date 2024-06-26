@@ -1,0 +1,14 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "program",
+      "program.c"
+    ],
+    "directory": "/home/mickey/Repos/c-practice/bounds-mcoutof",
+    "file": "/home/mickey/Repos/c-practice/bounds-mcoutof/program.c",
+    "output": "/home/mickey/Repos/c-practice/bounds-mcoutof/program"
+  }
+]
