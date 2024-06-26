@@ -15,8 +15,6 @@ int main(void)
     int index;
     struct myStruct mystr;
 
-    printf("\n");
-
     for(int i = 0; i < 4; i++)
     {
         char str[4];
@@ -28,7 +26,7 @@ int main(void)
         strncpy(mystr.groupC[i], str, 4);
     }
 
-    printf("|");
+    printf("\n|");
     for(int i = 0; i < 4; i++)
     {
         printf("%s|", mystr.groupA[i]);
@@ -44,15 +42,12 @@ int main(void)
         printf("%s|", mystr.groupC[i]);
     }
 
-    printf("\n\nHi.\n");
-    printf("What is your name?\n\r");
+    printf("\n\nHi.\nWhat is your name?\n\r");
 
     fgets(input, 25, stdin);
     input[strlen(input)-1] = '\0';
 
-    printf("Welcome %s! Have a knife day.\n", input);
-    printf("I'm trying to decide which cell to print from the B array.\n");
-    printf("Would you kindly pick a number between 0 and 3?\n");
+    printf("Welcome %s! Have a knife day.\nI'm trying to decide which cell to print from the B array.\nWould you kindly pick a number between 0 and 3?\n", input);
 
     fgets(input, 4, stdin);
 
