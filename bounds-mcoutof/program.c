@@ -18,12 +18,12 @@ int main(void)
     for(int i = 0; i < 4; i++)
     {
         char str[4];
-        snprintf(str, 4, "A:%d\0", i);
-        strncpy(mystr.groupA[i], str, 4);
-        snprintf(str, 4, "B:%d\0", i);
-        strncpy(mystr.groupB[i], str, 4);
-        snprintf(str, 4, "C:%d\0", i);
-        strncpy(mystr.groupC[i], str, 4);
+        snprintf(str, 4, "A:%d", i);
+        strncpy(mystr.groupA[i], str, 3);
+        snprintf(str, 4, "B:%d", i);
+        strncpy(mystr.groupB[i], str, 3);
+        snprintf(str, 4, "C:%d", i);
+        strncpy(mystr.groupC[i], str, 3);
     }
 
     printf("\n|");
