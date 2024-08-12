@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 char *strArr[] =
 {
@@ -9,15 +8,11 @@ char *strArr[] =
 
 char strCount = sizeof(strArr)/sizeof(strArr[0]);
 
+// writes a given array to a binary file,
+// then read it back and output to stdout.
 int main(int argc, char** argv)
 {
-    // receive target path from command line,
-    // else use default target path.
-    // write a given array to a binary file,
-    // then read it back and output to stdout.
-
-    char *path = malloc(sizeof(char)*13);
-    strcpy(path, "./output.bin");
+    char path[] = "./output.bin";
 
     FILE *outFile = fopen(path, "w");
     size_t written =
