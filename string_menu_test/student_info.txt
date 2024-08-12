@@ -1,0 +1,24 @@
+RT-ED MIDTERM TEST #2
+For Solar-Edge Candidates 2022-09
+
+Fill your details below.
+
+DATE:
+ID:
+FULL NAME:
+EMAIL:
+
+when finished, compress the string_menu_test folder into a file called
+c_2209_t02_FNAME_LNAME.zip
+(instead of zip you may use .7z .rar etc, make sure the file can be easily
+unpacked, no high compression)
+
+make sure you save your changes before compressin and sending!
+the folder should contain source files and .vscode folder only
+delete/move the executable beforehand (be careful not to delete
+other files)
+
+The zipped file should be sent/uploaded to the location instructed by the
+tester.
+
+Good Luck!
