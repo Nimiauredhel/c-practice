@@ -57,7 +57,7 @@ static void sv_grow(StringVector *sv)
     char** newArr;
     size_t newCapacity;
 
-    if (sv->capacity > 0)
+    if (sv->capacity == 0)
     {
         newCapacity = 4;
     }
@@ -72,15 +72,12 @@ static void sv_grow(StringVector *sv)
     {
         if (i < sv->length)
         {
-            newArr[i] = malloc(sizeof(char) * strlen(sv->arr[i]));
-            strcpy(sv->arr[i], newArr[i]);
+            newArr[i] = sv->arr[i];
         }
         else
         {
             newArr[i] = NULL;
         }
-
-        free(sv->arr[i]);
     }
 
     free(sv->arr);

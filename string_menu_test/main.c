@@ -3,7 +3,6 @@
 #include "string_vector.h"
 #include "string_functions.h"
 
-//TODO: ADD a typedef to StringVectorAction here
 typedef void (*StringVectorAction)(StringVector *sv);
 
 typedef struct MenuItem {
@@ -32,40 +31,96 @@ void action_rep_char_all(StringVector *sv);
 void action_zigzag_copy(StringVector *sv);
 
 int main(void) { 
-    //TODO: initialize a string vector
-    ;;
+    // Initializing the string vector
+    StringVector* sv = malloc(sizeof(StringVector));
+    sv_init(sv);
 
-    //TODO: initialize the menu array
-    MenuItem menu[] = 
+    // Initializing the menu array
+    const uint8_t numItems = 5;
+    const MenuItem menu[] = 
     {
         {
-            .description = "Add String",
+            .description = "Add string",
             .action = action_add_string
+        },
+        {
+            .description = "Delete string",
+            .action = action_del_string
+        },
+        {
+            .description = "Replace character",
+            .action = action_rep_char
+        },
+        {
+            .description = "Replace character from all",
+            .action = action_rep_char_all
+        },
+        {
+            .description = "Zigzag copy",
+            .action = action_zigzag_copy
         }
     };
 
-    //TODO: menu loop
-    ;;
+    while(1)
+    {
+        // begin menu loop
+        uint actionIndex;
+        printf("\n----------\n");
 
-    //TODO: make sure to free any dynamically allocated memory
-    ;;
+        // Print the strings in the vector
+        for (int i = 0; i < sv->length; i++)
+        {
+            printf("%u) %s\n", i, sv->arr[i]);
+        }
+
+        printf("\n");
+
+        // Print the menu options
+        for (int i = 0; i < numItems; i++)
+        {
+            printf("%u) %s\n", i+1, menu[i].description);
+        }
+
+        printf("%u) Quit\nSelect option: ", 0);
+
+        // Debug stuff
+        printf("\nLength: %lu, Capacity: %lu\n", sv->length, sv->capacity);
+
+        // Read input
+        scanf(" %u", &actionIndex);
+
+        if (actionIndex == 0)
+        {
+            break;
+        }
+        else if (actionIndex <= numItems)
+        {
+            menu[actionIndex-1].action(sv);
+        }
+    }
+
+    // Making sure to free any dynamically allocated memory
+    // (for the exercise, since it serves no purpose at this point)
+    sv_clear(sv);
+    free(sv);
+
+    return 0;
 }
-
-
-//TODO: complete the action_* functions below
 
 void action_add_string(StringVector *sv)
 {
-    char *str;
-    printf("Please provide the new string to add.\n");
-    scanf(" %s", str);
+    char *inputStr;
+    printf("\nPlease provide the new string to add.\n");
+    scanf(" %s", inputStr);
+    char *str = malloc(sizeof(char) * (strlen(inputStr)+1));
+    strcpy(str, inputStr);
     sv_add_last(sv, str);
 }
 
 void action_del_string(StringVector *sv)
 {
-    uint16_t idx;
-    printf("Please provide the index of the string to remove.\n");
+    uint idx;
+    printf("\nPlease provide the index of the string to remove.\n");
     scanf(" %u", &idx);
     sv_remove_at(sv, idx);
 }
@@ -87,14 +142,14 @@ void action_rep_char(StringVector *sv)
     
     if (sv->length <= idx)
     {
-        printf("\n\nRequested index is outside array bounds.\n\n";
+        printf("\n\nRequested index is outside array bounds.\n\n");
         return;
     }
 
     printf("\nPlease provide the character that you would like to be replaced.\n");
-    scanf(" %c", src);
+    scanf(" %c", &src);
     printf("\nPlease provide the character that you would like to replace the previous character with.\n");
-    scanf(" %c", dst);
+    scanf(" %c", &dst);
 
     char* str = sv->arr[idx];
     size_t length = strlen(str);
@@ -115,6 +170,11 @@ void action_rep_char_all(StringVector *sv)
         printf("\n\nArray is empty.\n\n");
         return;
     }
+
+    printf("\nPlease provide the character that you would like to be replaced.\n");
+    scanf(" %c", &src);
+    printf("\nPlease provide the character that you would like to replace the previous character with.\n");
+    scanf(" %c", &dst);
 
     for (int i = 0; i < sv->length; i++)
     {
@@ -139,11 +199,18 @@ void action_zigzag_copy(StringVector *sv)
         return;
     }
 
+    printf("\nPlease select the first string index.\n");
+    scanf(" %u", &first);
+    printf("\nPlease select the second string index.\n");
+    scanf(" %u", &second);
+
     if (sv->length <= first || sv->length <= second)
     {
         printf("\n\nArray is empty.\n\n");
         return;
     }
+
+    char* strFinal;
 
     {
         char* strFirst = sv->arr[first];
@@ -151,6 +218,28 @@ void action_zigzag_copy(StringVector *sv)
         size_t lengthFirst = strlen(strFirst);
         size_t lengthSecond = strlen(strSecond);
         size_t lengthFinal = lengthFirst+lengthSecond;
+        strFinal = malloc(sizeof(char)*(lengthFinal+1));
+
+        size_t idxOrigin = 0;
+
+        for(int i = 0; i < lengthFinal && idxOrigin < lengthFirst;
+                i < lengthSecond ? i+=2 : i++, idxOrigin++)
+        {
+            strFinal[i] = strFirst[idxOrigin];
+        }
+
+        idxOrigin = 0;
+
+        for(int i = 0; i < lengthFinal && idxOrigin < lengthSecond;
+                i < lengthFirst ? i+=2 : i++, idxOrigin++)
+        {
+            strFinal[i+1] = strSecond[idxOrigin];
+        }
+
+        strFinal[lengthFinal] = '\0';
+
     }
+
+    sv_add_last(sv, strFinal);
 }
 

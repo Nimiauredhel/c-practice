@@ -1,0 +1,14 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "main.o",
+      "main.c"
+    ],
+    "directory": "/home/mickey/Repos/c-practice/string_menu_test",
+    "file": "/home/mickey/Repos/c-practice/string_menu_test/main.c",
+    "output": "/home/mickey/Repos/c-practice/string_menu_test/main.o"
+  }
+]
