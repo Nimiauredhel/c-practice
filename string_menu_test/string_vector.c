@@ -1,5 +1,39 @@
 #include "string_vector.h"
 
+// my addition: internally facilitates growing array capacity (exponentially) when required
+static void sv_grow(StringVector *sv)
+{
+    char** newArr;
+    size_t newCapacity;
+
+    if (sv->capacity == 0)
+    {
+        newCapacity = 4;
+    }
+    else
+    {
+        newCapacity = sv->capacity * 2;
+    }
+
+    newArr = malloc(sizeof(char*) * newCapacity);
+
+    for (unsigned int i = 0; i < sv->capacity; i++)
+    {
+        if (i < sv->length)
+        {
+            newArr[i] = sv->arr[i];
+        }
+        else
+        {
+            newArr[i] = NULL;
+        }
+    }
+
+    free(sv->arr);
+    sv->arr = newArr;
+    sv->capacity = newCapacity;
+}
+
 //initialize sv (array NULL length 0)
 void sv_init(StringVector *sv)
 {
@@ -13,7 +47,7 @@ void sv_clear(StringVector *sv)
 {
     if (sv == NULL) return;
 
-    for (int i = 0; i < sv->capacity; i++)
+    for (unsigned int i = 0; i < sv->capacity; i++)
     {
         if (sv->arr[i] == NULL) continue;
         free(sv->arr[i]);
@@ -41,46 +75,13 @@ void sv_add_last(StringVector *sv, char *str)
 //remove string at index. does not shrink allocation size
 void sv_remove_at(StringVector *sv, size_t index)
 {
-    if (index < 0 || index >= sv->length || sv->arr[index] == NULL) return;
+    if (index >= sv->length || sv->arr[index] == NULL) return;
 
-    for (int i = index; i < sv->length-1; i++)
+    for (unsigned int i = index; i < sv->length-1; i++)
     {
         sv->arr[i] = sv->arr[i+1];
     }
 
     sv->arr[sv->length-1] = NULL;
     sv->length--;
-}
-
-static void sv_grow(StringVector *sv)
-{
-    char** newArr;
-    size_t newCapacity;
-
-    if (sv->capacity == 0)
-    {
-        newCapacity = 4;
-    }
-    else
-    {
-        newCapacity = sv->capacity * 2;
-    }
-
-    newArr = malloc(sizeof(char*) * newCapacity);
-
-    for (int i = 0; i < sv->capacity; i++)
-    {
-        if (i < sv->length)
-        {
-            newArr[i] = sv->arr[i];
-        }
-        else
-        {
-            newArr[i] = NULL;
-        }
-    }
-
-    free(sv->arr);
-    sv->arr = newArr;
-    sv->capacity = newCapacity;
 }

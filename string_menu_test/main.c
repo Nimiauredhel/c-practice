@@ -1,4 +1,6 @@
+#define _GNU_SOURCE
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include "string_vector.h"
 #include "string_functions.h"
@@ -36,7 +38,7 @@ int main(void) {
     sv_init(sv);
 
     // Initializing the menu array
-    const uint8_t numItems = 5;
+    const unsigned char numItems = 5;
     const MenuItem menu[] = 
     {
         {
@@ -64,11 +66,12 @@ int main(void) {
     while(1)
     {
         // begin menu loop
-        uint actionIndex;
+        unsigned int actionIndex;
+        unsigned int i;
         printf("\n----------\n");
 
         // Print the strings in the vector
-        for (int i = 0; i < sv->length; i++)
+        for (i = 0; i < sv->length; i++)
         {
             printf("%u) %s\n", i, sv->arr[i]);
         }
@@ -76,7 +79,7 @@ int main(void) {
         printf("\n");
 
         // Print the menu options
-        for (int i = 0; i < numItems; i++)
+        for (i = 0; i < numItems; i++)
         {
             printf("%u) %s\n", i+1, menu[i].description);
         }
@@ -109,17 +112,16 @@ int main(void) {
 
 void action_add_string(StringVector *sv)
 {
-    char *inputStr;
+    char *inputStr = NULL;
+    size_t buffSize = 0;
     printf("\nPlease provide the new string to add.\n");
-    scanf(" %s", inputStr);
-    char *str = malloc(sizeof(char) * (strlen(inputStr)+1));
-    strcpy(str, inputStr);
-    sv_add_last(sv, str);
+    getline(&inputStr, &buffSize, stdin);
+    sv_add_last(sv, inputStr);
 }
 
 void action_del_string(StringVector *sv)
 {
-    uint idx;
+    unsigned int idx;
     printf("\nPlease provide the index of the string to remove.\n");
     scanf(" %u", &idx);
     sv_remove_at(sv, idx);
@@ -127,7 +129,7 @@ void action_del_string(StringVector *sv)
 
 void action_rep_char(StringVector *sv)
 {
-    uint idx;
+    unsigned int idx;
     char src;
     char dst;
 
@@ -154,7 +156,7 @@ void action_rep_char(StringVector *sv)
     char* str = sv->arr[idx];
     size_t length = strlen(str);
 
-    for (int i = 0; i < length; i++)
+    for (unsigned int i = 0; i < length; i++)
     {
         if (str[i] == src) str[i] = dst;
     }
@@ -176,12 +178,12 @@ void action_rep_char_all(StringVector *sv)
     printf("\nPlease provide the character that you would like to replace the previous character with.\n");
     scanf(" %c", &dst);
 
-    for (int i = 0; i < sv->length; i++)
+    for (unsigned int i = 0; i < sv->length; i++)
     {
         char* str = sv->arr[i];
         size_t length = strlen(str);
 
-        for (int j = 0; j < length; j++)
+        for (unsigned int j = 0; j < length; j++)
         {
             if (str[j] == src) str[j] = dst;
         }
@@ -190,8 +192,8 @@ void action_rep_char_all(StringVector *sv)
 
 void action_zigzag_copy(StringVector *sv)
 {
-    uint first;
-    uint second;
+    unsigned int first;
+    unsigned int second;
 
     if (sv->length <= 0)
     {
@@ -222,7 +224,7 @@ void action_zigzag_copy(StringVector *sv)
 
         size_t idxOrigin = 0;
 
-        for(int i = 0; i < lengthFinal && idxOrigin < lengthFirst;
+        for(unsigned int i = 0; i < lengthFinal && idxOrigin < lengthFirst;
                 i < lengthSecond ? i+=2 : i++, idxOrigin++)
         {
             strFinal[i] = strFirst[idxOrigin];
@@ -230,7 +232,7 @@ void action_zigzag_copy(StringVector *sv)
 
         idxOrigin = 0;
 
-        for(int i = 0; i < lengthFinal && idxOrigin < lengthSecond;
+        for(unsigned int i = 0; i < lengthFinal && idxOrigin < lengthSecond;
                 i < lengthFirst ? i+=2 : i++, idxOrigin++)
         {
             strFinal[i+1] = strSecond[idxOrigin];

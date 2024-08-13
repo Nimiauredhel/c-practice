@@ -26,7 +26,4 @@ void sv_add_last(StringVector *sv, char *str);
 //assumes index is in range
 void sv_remove_at(StringVector *sv, size_t index);
 
-// my addition: internally facilitates growing array capacity (exponentially) when required
-static void sv_grow(StringVector *sv);
-
 #endif
