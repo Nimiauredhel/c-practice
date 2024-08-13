@@ -227,7 +227,7 @@ void action_zigzag_copy(StringVector *sv)
         size_t idxOrigin = 0;
 
         for(unsigned int i = 0; i < lengthFinal && idxOrigin < lengthFirst;
-                i < lengthSecond ? i+=2 : i++, idxOrigin++)
+                i <= lengthSecond ? i+=2 : i++, idxOrigin++)
         {
             strFinal[i] = strFirst[idxOrigin];
         }
@@ -235,7 +235,7 @@ void action_zigzag_copy(StringVector *sv)
         idxOrigin = 0;
 
         for(unsigned int i = 0; i < lengthFinal && idxOrigin < lengthSecond;
-                i < lengthFirst ? i+=2 : i++, idxOrigin++)
+                i <= lengthFirst ? i+=2 : i++, idxOrigin++)
         {
             strFinal[i+1] = strSecond[idxOrigin];
         }
