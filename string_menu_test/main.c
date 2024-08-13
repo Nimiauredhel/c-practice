@@ -73,7 +73,7 @@ int main(void) {
         // Print the strings in the vector
         for (i = 0; i < sv->length; i++)
         {
-            printf("%u) %s\n", i, sv->arr[i]);
+            printf("%u) %s", i, sv->arr[i]);
         }
 
         printf("\n");
@@ -115,6 +115,8 @@ void action_add_string(StringVector *sv)
     char *inputStr = NULL;
     size_t buffSize = 0;
     printf("\nPlease provide the new string to add.\n");
+    // calling the function twice to consume the remaining newline
+    getline(&inputStr, &buffSize, stdin);
     getline(&inputStr, &buffSize, stdin);
     sv_add_last(sv, inputStr);
 }
