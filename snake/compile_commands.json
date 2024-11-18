@@ -1,0 +1,26 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "prog",
+      "delay.c"
+    ],
+    "directory": "/home/mickey/Repos/c-practice/snake",
+    "file": "/home/mickey/Repos/c-practice/snake/delay.c",
+    "output": "/home/mickey/Repos/c-practice/snake/prog"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "prog",
+      "main.c"
+    ],
+    "directory": "/home/mickey/Repos/c-practice/snake",
+    "file": "/home/mickey/Repos/c-practice/snake/main.c",
+    "output": "/home/mickey/Repos/c-practice/snake/prog"
+  }
+]
