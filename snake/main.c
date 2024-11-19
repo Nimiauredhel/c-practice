@@ -19,7 +19,7 @@
 #define APPLE_MAX_COUNT 4
 #define TAIL_MAX_LENGTH 256
 #define GAME_TICK_MS 64
-#define APPLE_RESPAWN_MS 3200
+#define APPLE_RESPAWN_MS 1600
 
 typedef struct GameState
 {
@@ -215,6 +215,7 @@ void handle_apple_spawning(void)
             game.apple_timer = 0;
 
             game.next_apple_idx = -1;
+            determine_next_apple_pos();
 
             for (idx = 0; idx < APPLE_MAX_COUNT; idx++)
             {
@@ -239,8 +240,6 @@ void handle_tail_collision(void)
 
 void handle_apple_collision(uint8_t apple_idx)
 {
-    game.tail_coords[game.tail_length][0] = 0;
-    game.tail_coords[game.tail_length][1] = 0;
     game.tail_length++;
 
     game.apple_coords[apple_idx][0] = -1;
