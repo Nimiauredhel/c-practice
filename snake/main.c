@@ -12,6 +12,7 @@
 #define WIDTH 80
 #define HEIGHT 24
 
+bool running = false;
 int8_t head_x = WIDTH / 2;
 int8_t head_y = HEIGHT / 2;
 int8_t dir_x = 0;
@@ -53,6 +54,7 @@ void draw_frame(void)
             {
                 gotoxy(x, y);
                 printf("%c", chars[current]);
+                grid[x][y] = current - 1;
             }
         }
     }
@@ -97,29 +99,37 @@ void handle_input(void)
             return;
     }
 
-        grid[head_x][head_y] = 0;
+    running = true;
+}
 
-        head_x += dir_x;
-        head_y += dir_y;
+void handle_movement(void)
+{
+    //grid[head_x][head_y] = 0;
 
-        if (head_x < 0) head_x = 0;
-        else if (head_x >= WIDTH) head_x = WIDTH - 1;
+    head_x += dir_x;
+    head_y += dir_y;
 
-        if (head_y < 0) head_y = 0;
-        else if (head_y >= HEIGHT) head_y = HEIGHT - 1;
+    if (head_x < 0) head_x = WIDTH - 1;
+    else if (head_x >= WIDTH) head_x = 0;
 
-        grid[head_x][head_y] = 1;
+    if (head_y < 0) head_y = HEIGHT - 1;
+    else if (head_y >= HEIGHT) head_y = 0;
+
+    grid[head_x][head_y] = 4;
 }
 
 void inner_loop(void)
 {
     while(true)
     {
-        if(poll(&pollReq, 1, 10))
+        if(poll(&pollReq, 1, 24))
         {
             handle_input();
         }
 
+        if (!running) continue;
+
+        handle_movement();
         draw_frame();
         delay_ms(10);
     }
@@ -127,12 +137,13 @@ void inner_loop(void)
 
 void inner_init()
 {
+    running = false;
     head_x = WIDTH / 2;
     head_y = HEIGHT / 2;
     dir_x = 0;
     dir_y = 0;
     clear_grid();
-    grid[head_x][head_y] = 1;
+    grid[head_x][head_y] = 4;
     draw_frame();
 }
 
