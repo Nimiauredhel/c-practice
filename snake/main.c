@@ -162,8 +162,8 @@ void determine_next_apple_pos(void)
 
     while (!success)
     {
-        next_x = (rand() % (WIDTH - 2)) + 1;
-        next_y = (rand() % (HEIGHT - 2)) + 1;
+        next_x = rand() % (WIDTH-1) + 1;
+        next_y = rand() % (HEIGHT-1) + 1;
 
         success = true;
 
@@ -306,10 +306,10 @@ void handle_movement(void)
     game.head_y += game.dir_y;
 
     if (game.head_x <= 1) game.head_x = WIDTH - 2;
-    else if (game.head_x >= WIDTH-1) game.head_x = 1;
+    else if (game.head_x >= WIDTH-1) game.head_x = 2;
 
     if (game.head_y <= 1) game.head_y = HEIGHT - 2;
-    else if (game.head_y >= HEIGHT-1) game.head_y = 1;
+    else if (game.head_y >= HEIGHT-1) game.head_y = 2;
 }
 
 void inner_loop(void)
@@ -338,6 +338,8 @@ void inner_loop(void)
 
 void inner_init()
 {
+    uint16_t idx = 0;
+
     game.running = false;
     game.head_x = WIDTH / 2;
     game.head_y = HEIGHT / 2;
@@ -345,15 +347,23 @@ void inner_init()
     game.dir_y = 0;
     game.apple_timer = 0;
     game.tail_length = 0;
-    game.next_apple_x = game.head_x;
-    game.next_apple_y = game.head_y;
     game.next_apple_idx = 0;
-    memset(game.apple_coords, -1, APPLE_MAX_COUNT);
-    memset(game.tail_coords, -1, TAIL_MAX_LENGTH);
+
+    for (idx = 0; idx < TAIL_MAX_LENGTH; idx++)
+    {
+        memset(game.tail_coords[idx], -1, 2);
+    }
+
+    for (idx = 0; idx < APPLE_MAX_COUNT; idx++)
+    {
+        memset(game.apple_coords[idx], -1, 2);
+    }
+
     clear_frame();
     draw_frame_static();
     draw_frame_dynamic();
     fflush(stdin);
+    determine_next_apple_pos();
 }
 
 void outer_loop(void)
