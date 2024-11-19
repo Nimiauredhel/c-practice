@@ -14,7 +14,7 @@
  * game defs
  */
 
-#define WIDTH 80
+#define WIDTH 48
 #define HEIGHT 24
 #define APPLE_MAX_COUNT 4
 #define TAIL_MAX_LENGTH 256
@@ -293,7 +293,7 @@ void handle_movement(void)
     {
         uint16_t idx = 0;
 
-        for (idx = game.tail_length; idx > 0; idx--)
+        for (idx = game.tail_length - 1; idx > 0; idx--)
         {
             game.tail_coords[idx][0] = game.tail_coords[idx-1][0];
             game.tail_coords[idx][1] = game.tail_coords[idx-1][1];
