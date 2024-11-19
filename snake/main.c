@@ -162,8 +162,8 @@ void determine_next_apple_pos(void)
 
     while (!success)
     {
-        next_x = rand() % (WIDTH-1) + 1;
-        next_y = rand() % (HEIGHT-1) + 1;
+        next_x = rand() % (WIDTH-3) + 3;
+        next_y = rand() % (HEIGHT-3) + 3;
 
         success = true;
 
