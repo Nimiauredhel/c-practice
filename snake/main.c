@@ -14,7 +14,7 @@
  * game defs
  */
 
-#define WIDTH 48
+#define WIDTH 64
 #define HEIGHT 24
 #define APPLE_MAX_COUNT 4
 #define TAIL_MAX_LENGTH 256
