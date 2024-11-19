@@ -12,12 +12,9 @@
 #define WIDTH 80
 #define HEIGHT 24
 
-bool running = false;
-int8_t head_x = WIDTH / 2;
-int8_t head_y = HEIGHT / 2;
-int8_t dir_x = 0;
-int8_t dir_y = 0;
-uint8_t grid[WIDTH][HEIGHT] = {0};
+/*
+ * system vars
+ */
 
 struct pollfd pollReq =
 {
@@ -27,6 +24,32 @@ struct pollfd pollReq =
 
 struct termios config;
 
+/*
+ * game vars
+ */
+
+typedef struct GameState
+{
+    bool running;
+    uint8_t head_x;
+    uint8_t head_y;
+    int8_t dir_x;
+    int8_t dir_y;
+    int8_t apple_coords[4][2]; 
+    int8_t tail_coords[256][2];
+} GameState_t;
+
+GameState_t gameState =
+{
+    .running = false,
+    .head_x = WIDTH / 2,
+    .head_y = HEIGHT / 2,
+    .dir_x = 0,
+    .dir_y = 0,
+    .apple_coords = {-1},
+    .tail_coords = {-1}
+};
+
 char chars[5] = {' ', 'O', 'o', '@', 'X'};
 
 void gotoxy(uint8_t x, uint8_t y)
@@ -34,43 +57,54 @@ void gotoxy(uint8_t x, uint8_t y)
     printf("\033[%d;%dH", (y), (x));
 }
 
-void clear(void)
+void clear_frame(void)
 {
     printf("\033[H\033[J");
 }
 
-void draw_frame(void)
+void draw_frame_static(void)
 {
-    uint8_t current = 0;
-    clear();
+    uint16_t idx = 0;
 
-    for (uint8_t x = 0; x < WIDTH; x++)
+    for (idx = 0; idx < WIDTH; idx++)
     {
-        for (uint8_t y = 0; y < HEIGHT; y++)
-        {
-            current = grid[x][y];
+        gotoxy(idx, 0);
+        printf("%c", chars[4]);
+        gotoxy(idx, HEIGHT-1);
+        printf("%c", chars[4]);
+    }
 
-            if (current > 0)
-            {
-                gotoxy(x, y);
-                printf("%c", chars[current]);
-                grid[x][y] = current - 1;
-            }
-        }
+    for (idx = 0; idx < HEIGHT; idx++)
+    {
+        gotoxy(0, idx);
+        printf("%c", chars[4]);
+        gotoxy(WIDTH-1, idx);
+        printf("%c", chars[4]);
+    }
+}
+
+void draw_frame_dynamic(void)
+{
+    uint16_t idx = 0;
+    
+    gotoxy(gameState.head_x, gameState.head_y);
+    printf("%c", chars[1]);
+
+    for (idx = 0; idx < 256; idx++)
+    {
+        if (gameState.tail_coords[idx][0] < 0) break;
+        gotoxy(gameState.tail_coords[idx][0], gameState.tail_coords[idx][1]);
+        printf("%c", chars[2]);
+    }
+
+    for (idx = 0; idx < 4; idx++)
+    {
+        if (gameState.apple_coords[idx][0] < 0) break;
+        gotoxy(gameState.apple_coords[idx][0], gameState.apple_coords[idx][1]);
+        printf("%c", chars[3]);
     }
 
     fflush(stdout);
-}
-
-void clear_grid(void)
-{
-    for (uint8_t x = 0; x < WIDTH; x++)
-    {
-        for (uint8_t y = 0; y < HEIGHT; y++)
-        {
-            grid[x][y] = 0;
-        }
-    }
 }
 
 void handle_input(void)
@@ -80,42 +114,38 @@ void handle_input(void)
     switch (input)
     {
         case 'h':
-            dir_x = -1;
-            dir_y = 0;
+            gameState.dir_x = -1;
+            gameState.dir_y = 0;
             break;
         case 'j':
-            dir_x = 0;
-            dir_y = 1;
+            gameState.dir_x = 0;
+            gameState.dir_y = 1;
             break;
         case 'k':
-            dir_x = 0;
-            dir_y = -1;
+            gameState.dir_x = 0;
+            gameState.dir_y = -1;
             break;
         case 'l':
-            dir_x = 1;
-            dir_y = 0;
+            gameState.dir_x = 1;
+            gameState.dir_y = 0;
             break;
         default:
             return;
     }
 
-    running = true;
+    gameState.running = true;
 }
 
 void handle_movement(void)
 {
-    //grid[head_x][head_y] = 0;
+    gameState.head_x += gameState.dir_x;
+    gameState.head_y += gameState.dir_y;
 
-    head_x += dir_x;
-    head_y += dir_y;
+    if (gameState.head_x <= 1) gameState.head_x = WIDTH - 2;
+    else if (gameState.head_x >= WIDTH-1) gameState.head_x = 1;
 
-    if (head_x < 0) head_x = WIDTH - 1;
-    else if (head_x >= WIDTH) head_x = 0;
-
-    if (head_y < 0) head_y = HEIGHT - 1;
-    else if (head_y >= HEIGHT) head_y = 0;
-
-    grid[head_x][head_y] = 4;
+    if (gameState.head_y <= 1) gameState.head_y = HEIGHT - 2;
+    else if (gameState.head_y >= HEIGHT-1) gameState.head_y = 1;
 }
 
 void inner_loop(void)
@@ -127,24 +157,24 @@ void inner_loop(void)
             handle_input();
         }
 
-        if (!running) continue;
+        if (!gameState.running) continue;
 
         handle_movement();
-        draw_frame();
+        clear_frame();
+        draw_frame_static();
+        draw_frame_dynamic();
         delay_ms(10);
     }
 }
 
 void inner_init()
 {
-    running = false;
-    head_x = WIDTH / 2;
-    head_y = HEIGHT / 2;
-    dir_x = 0;
-    dir_y = 0;
-    clear_grid();
-    grid[head_x][head_y] = 4;
-    draw_frame();
+    gameState.running = false;
+    gameState.head_x = WIDTH / 2;
+    gameState.head_y = HEIGHT / 2;
+    gameState.dir_x = 0;
+    gameState.dir_y = 0;
+    draw_frame_dynamic();
 }
 
 void outer_loop(void)
