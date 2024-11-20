@@ -119,9 +119,6 @@ void draw_frame_static(void)
 void draw_frame_dynamic(bool wipe)
 {
     uint16_t idx = 0;
-    
-    gotoxy(game.head_x, game.head_y);
-    printf("%c", chars[wipe ? 0 : 1]);
 
     for (idx = 0; idx < TAIL_MAX_LENGTH; idx++)
     {
@@ -136,9 +133,75 @@ void draw_frame_dynamic(bool wipe)
         gotoxy(game.apple_coords[idx][0], game.apple_coords[idx][1]);
         printf("%c", chars[wipe ? 0 : 3]);
     }
+
+    gotoxy(game.head_x, game.head_y);
+    printf("%c", chars[wipe ? 0 : 1]);
 }
 
-void handle_input(void)
+void game_over(uint16_t collided_idx)
+{
+    uint16_t gap = 50;
+    int16_t idx = 0;
+
+    delay_ms(gap);
+
+    for (idx = game.tail_length - 1; idx >= 0; idx--)
+    {
+        if (idx == collided_idx) continue;
+        gotoxy(game.tail_coords[idx][0], game.tail_coords[idx][1]);
+        printf("%c", ',');
+        fflush(stdout);
+        delay_ms(gap);
+    }
+
+    delay_ms(gap);
+
+    for (idx = game.tail_length - 1; idx >= 0; idx--)
+    {
+        if (idx == collided_idx) continue;
+        gotoxy(game.tail_coords[idx][0], game.tail_coords[idx][1]);
+        printf("%c", '.');
+        fflush(stdout);
+        delay_ms(gap);
+    }
+
+    delay_ms(gap);
+
+    for (idx = game.tail_length - 1; idx >= 0; idx--)
+    {
+        if (idx == collided_idx) continue;
+        gotoxy(game.tail_coords[idx][0], game.tail_coords[idx][1]);
+        printf("%c", ' ');
+        fflush(stdout);
+        delay_ms(gap);
+    }
+
+    delay_ms(gap);
+    delay_ms(gap);
+
+    gotoxy(game.head_x, game.head_y);
+    printf("%c", 'x');
+    fflush(stdout);
+    delay_ms(gap);
+    delay_ms(gap);
+
+    gotoxy(game.head_x, game.head_y);
+    printf("%c", ',');
+    fflush(stdout);
+    delay_ms(gap);
+    delay_ms(gap);
+
+    gotoxy(game.head_x, game.head_y);
+    printf("%c", '.');
+    fflush(stdout);
+    delay_ms(gap);
+    delay_ms(gap);
+
+    print("-------- Game Over --------\n");
+    poll(&pollReq, 1, -1);
+}
+
+bool handle_input(void)
 {
     char input = getchar();
 
@@ -160,11 +223,14 @@ void handle_input(void)
             game.dir_x = 1;
             game.dir_y = 0;
             break;
+        case 'x':
+            return true;
         default:
-            return;
+            return false;
     }
 
     game.running = true;
+    return false;
 }
 
 void determine_next_apple_pos(void)
@@ -251,11 +317,6 @@ void handle_apple_spawning(void)
     }
 }
 
-void handle_tail_collision(void)
-{
-    game.running = false;
-}
-
 void handle_apple_collision(uint8_t apple_idx)
 {
     game.tail_length++;
@@ -270,7 +331,7 @@ void handle_apple_collision(uint8_t apple_idx)
     print(tail_length_string);
 }
 
-void detect_collision(void)
+bool detect_collision(void)
 {
     uint16_t idx = 0;
 
@@ -281,7 +342,8 @@ void detect_collision(void)
         if (game.tail_coords[idx][0] == game.head_x
                 && game.tail_coords[idx][1] == game.head_y)
         {
-            handle_tail_collision();
+            game_over(idx);
+            return true;
         }
     }
 
@@ -301,6 +363,8 @@ void detect_collision(void)
     {
         determine_next_apple_pos();
     }
+    
+    return false;
 }
 
 void handle_movement(void)
@@ -334,7 +398,7 @@ void handle_movement(void)
     else if (game.head_y > HEIGHT+1) game.head_y = 2;
 }
 
-void inner_loop(void)
+bool inner_loop(void)
 {
     //char status[] = "GAME: XX, INPUT: XX";
 
@@ -350,7 +414,11 @@ void inner_loop(void)
 
             if(poll(&pollReq, 1, 0))
             {
-                handle_input();
+                if(handle_input())
+                {
+                    print("Thank you for playing! --------\n");
+                    return true;
+                }
             }
         }
         else game.ms_since_input_tick += 1;
@@ -361,26 +429,27 @@ void inner_loop(void)
         {
             game.ms_since_game_tick = 0;
 
+            if (detect_collision()) break;
+
             draw_frame_dynamic(true);
-
             handle_movement();
-            detect_collision();
             handle_apple_spawning();
-
             draw_frame_dynamic(false);
             fflush(stdout);
         }
         else game.ms_since_game_tick += 1;
     }
+
+    return false;
 }
 
 void inner_init()
 {
     uint16_t idx = 0;
 
+    game.running = false;
     game.ms_since_game_tick = 0;
     game.ms_since_input_tick = 0;
-    game.running = false;
     game.head_x = WIDTH / 2;
     game.head_y = HEIGHT / 2;
     game.dir_x = 0;
@@ -405,15 +474,18 @@ void inner_init()
     fflush(stdin);
     delay_ms(1);
     draw_frame_dynamic(false);
-    print("h, j, k, l to move\n");
+    print("h, j, k, l to move, x to quit\n");
     fflush(stdin);
     delay_ms(1);
 }
 
 void outer_loop(void)
 {
-    inner_init();
-    inner_loop();
+    while(true)
+    {
+        inner_init();
+        if(inner_loop()) break;
+    }
 }
 
 void outer_init(void)
