@@ -14,24 +14,29 @@
  * game defs
  */
 
-#define WIDTH 64
-#define HEIGHT 24
-#define APPLE_MAX_COUNT 4
-#define TAIL_MAX_LENGTH 256
-#define GAME_TICK_MS 64
-#define APPLE_RESPAWN_MS 1600
+#define WIDTH (32)
+#define HEIGHT (16)
+#define LOGLINE_X (WIDTH/4)
+#define LOGLINE_Y (HEIGHT+3)
+#define APPLE_MAX_COUNT (4)
+#define TAIL_MAX_LENGTH (128)
+#define INPUT_TICK_MS (32)
+#define GAME_TICK_MS (64)
+#define APPLE_RESPAWN_MS (1000)
 
 typedef struct GameState
 {
     bool running;
+    uint8_t ms_since_game_tick;
+    uint8_t ms_since_input_tick;
+    uint16_t ms_since_apple_spawn;
     uint8_t head_x;
     uint8_t head_y;
     int8_t dir_x;
     int8_t dir_y;
     uint8_t next_apple_x;
     uint8_t next_apple_y;
-    uint8_t next_apple_idx;
-    uint16_t apple_timer;
+    int8_t next_apple_idx;
     uint16_t tail_length;
     int8_t apple_coords[APPLE_MAX_COUNT][2]; 
     int8_t tail_coords[TAIL_MAX_LENGTH][2];
@@ -57,6 +62,9 @@ const char chars[5] = {' ', 'O', 'o', '@', 'X'};
 
 GameState_t game =
 {
+    .ms_since_game_tick = 0,
+    .ms_since_input_tick = 0,
+    .ms_since_apple_spawn = 0,
     .running = false,
     .head_x = WIDTH / 2,
     .head_y = HEIGHT / 2,
@@ -65,15 +73,21 @@ GameState_t game =
     .next_apple_x = 0,
     .next_apple_y = 0,
     .next_apple_idx = 0,
-    .apple_timer = 0,
     .tail_length = 0,
-    .apple_coords = {-1},
-    .tail_coords = {-1}
+    .apple_coords = {{-1}},
+    .tail_coords = {{-1}}
 };
 
 void gotoxy(uint8_t x, uint8_t y)
 {
     printf("\033[%d;%dH", (y), (x));
+}
+
+void print(char *text)
+{
+    gotoxy(LOGLINE_X, LOGLINE_Y);
+    printf("%s", text);
+    fflush(stdin);
 }
 
 void clear_frame(void)
@@ -85,42 +99,42 @@ void draw_frame_static(void)
 {
     uint16_t idx = 0;
 
-    for (idx = 0; idx < WIDTH; idx++)
+    for (idx = 1; idx <= WIDTH+2; idx++)
     {
-        gotoxy(idx, 0);
+        gotoxy(idx, 1);
         printf("%c", chars[4]);
-        gotoxy(idx, HEIGHT-1);
+        gotoxy(idx, HEIGHT+2);
         printf("%c", chars[4]);
     }
 
-    for (idx = 0; idx < HEIGHT; idx++)
+    for (idx = 1; idx <= HEIGHT+2; idx++)
     {
-        gotoxy(0, idx);
+        gotoxy(1, idx);
         printf("%c", chars[4]);
-        gotoxy(WIDTH-1, idx);
+        gotoxy(WIDTH+2, idx);
         printf("%c", chars[4]);
     }
 }
 
-void draw_frame_dynamic(void)
+void draw_frame_dynamic(bool wipe)
 {
     uint16_t idx = 0;
     
     gotoxy(game.head_x, game.head_y);
-    printf("%c", chars[1]);
+    printf("%c", chars[wipe ? 0 : 1]);
 
     for (idx = 0; idx < TAIL_MAX_LENGTH; idx++)
     {
         if (game.tail_coords[idx][0] < 0) break;
         gotoxy(game.tail_coords[idx][0], game.tail_coords[idx][1]);
-        printf("%c", chars[2]);
+        printf("%c", chars[wipe ? 0 : 2]);
     }
 
     for (idx = 0; idx < APPLE_MAX_COUNT; idx++)
     {
         if (game.apple_coords[idx][0] < 0) continue;
         gotoxy(game.apple_coords[idx][0], game.apple_coords[idx][1]);
-        printf("%c", chars[3]);
+        printf("%c", chars[wipe ? 0 : 3]);
     }
 }
 
@@ -162,8 +176,8 @@ void determine_next_apple_pos(void)
 
     while (!success)
     {
-        next_x = rand() % (WIDTH-3) + 3;
-        next_y = rand() % (HEIGHT-3) + 3;
+        next_x = (rand() % (WIDTH)) + 2;
+        next_y = (rand() % (HEIGHT)) + 2;
 
         success = true;
 
@@ -200,19 +214,23 @@ void determine_next_apple_pos(void)
 
     game.next_apple_x = next_x;
     game.next_apple_y = next_y;
+
+    //char next_apple_string[] = "Apple Next X: xx, Y: xx";
+    //sprintf(next_apple_string, "Apple Next X: %2u, Y: %2u", next_x, next_y);
+    //print(next_apple_string);
 }
 
 void handle_apple_spawning(void)
 {
     if (game.next_apple_idx >= 0)
     {
-        if (game.apple_timer >= APPLE_RESPAWN_MS)
+        if (game.ms_since_apple_spawn >= APPLE_RESPAWN_MS)
         {
             uint8_t idx = 0;
 
             game.apple_coords[game.next_apple_idx][0] = game.next_apple_x;
             game.apple_coords[game.next_apple_idx][1] = game.next_apple_y;
-            game.apple_timer = 0;
+            game.ms_since_apple_spawn = 0;
 
             game.next_apple_idx = -1;
             determine_next_apple_pos();
@@ -228,7 +246,7 @@ void handle_apple_spawning(void)
         }
         else 
         {
-            game.apple_timer += GAME_TICK_MS;
+            game.ms_since_apple_spawn += GAME_TICK_MS;
         }
     }
 }
@@ -245,7 +263,11 @@ void handle_apple_collision(uint8_t apple_idx)
     game.apple_coords[apple_idx][0] = -1;
     game.apple_coords[apple_idx][1] = -1;
     game.next_apple_idx = apple_idx;
-    game.apple_timer = 0;
+    game.ms_since_apple_spawn = 0;
+
+    char tail_length_string[] = "Tail Length:   0   \n";
+    sprintf(tail_length_string, "Tail Length: %3u   \n", game.tail_length);
+    print(tail_length_string);
 }
 
 void detect_collision(void)
@@ -305,34 +327,50 @@ void handle_movement(void)
     game.head_x += game.dir_x;
     game.head_y += game.dir_y;
 
-    if (game.head_x <= 1) game.head_x = WIDTH - 2;
-    else if (game.head_x >= WIDTH-1) game.head_x = 2;
+    if (game.head_x < 2) game.head_x = WIDTH+1;
+    else if (game.head_x > WIDTH+1) game.head_x = 2;
 
-    if (game.head_y <= 1) game.head_y = HEIGHT - 2;
-    else if (game.head_y >= HEIGHT-1) game.head_y = 2;
+    if (game.head_y < 2) game.head_y = HEIGHT+1;
+    else if (game.head_y > HEIGHT+1) game.head_y = 2;
 }
 
 void inner_loop(void)
 {
+    //char status[] = "GAME: XX, INPUT: XX";
+
     while(true)
     {
-        if(poll(&pollReq, 1, 24))
+        delay_ms(1);
+        //sprintf(status, "Game: %2u, Input: %2u", game.ms_since_game_tick, game.ms_since_input_tick);
+        //print(status);
+
+        if (game.ms_since_input_tick >= INPUT_TICK_MS)
         {
-            handle_input();
+            game.ms_since_input_tick = 0;
+
+            if(poll(&pollReq, 1, 0))
+            {
+                handle_input();
+            }
         }
+        else game.ms_since_input_tick += 1;
 
         if (!game.running) continue;
 
-        handle_movement();
-        detect_collision();
-        handle_apple_spawning();
+        if (game.ms_since_game_tick >= GAME_TICK_MS)
+        {
+            game.ms_since_game_tick = 0;
 
-        clear_frame();
-        draw_frame_static();
-        draw_frame_dynamic();
-        fflush(stdout);
+            draw_frame_dynamic(true);
 
-        delay_ms(GAME_TICK_MS);
+            handle_movement();
+            detect_collision();
+            handle_apple_spawning();
+
+            draw_frame_dynamic(false);
+            fflush(stdout);
+        }
+        else game.ms_since_game_tick += 1;
     }
 }
 
@@ -340,12 +378,14 @@ void inner_init()
 {
     uint16_t idx = 0;
 
+    game.ms_since_game_tick = 0;
+    game.ms_since_input_tick = 0;
     game.running = false;
     game.head_x = WIDTH / 2;
     game.head_y = HEIGHT / 2;
     game.dir_x = 0;
     game.dir_y = 0;
-    game.apple_timer = 0;
+    game.ms_since_apple_spawn = 0;
     game.tail_length = 0;
     game.next_apple_idx = 0;
 
@@ -359,11 +399,15 @@ void inner_init()
         memset(game.apple_coords[idx], -1, 2);
     }
 
+    determine_next_apple_pos();
     clear_frame();
     draw_frame_static();
-    draw_frame_dynamic();
     fflush(stdin);
-    determine_next_apple_pos();
+    delay_ms(1);
+    draw_frame_dynamic(false);
+    print("h, j, k, l to move\n");
+    fflush(stdin);
+    delay_ms(1);
 }
 
 void outer_loop(void)
