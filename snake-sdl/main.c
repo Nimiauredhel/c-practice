@@ -137,6 +137,7 @@ void draw_frame_static(void)
 void draw_frame_dynamic(bool wipe)
 {
     uint16_t idx = 0;
+    float tail_scale = 1.0;
 
     for (idx = 0; idx < TAIL_MAX_LENGTH; idx++)
     {
@@ -148,13 +149,19 @@ void draw_frame_dynamic(bool wipe)
         {
             gfx_draw(GFX_NONE, game.tail_coords[idx][0], game.tail_coords[idx][1]);
         }
-        else if (game.tail_dirs[idx][0] == 0)
-        {
-            gfx_draw_scaled(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1], 1.0 / (1+(idx/50.0)), 1.0);
-        }
         else
         {
-            gfx_draw_scaled(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1], 1.0, 1.0 / (1+(idx/50.0)));
+            if (game.tail_dirs[idx][0] == 0)
+            {
+                gfx_draw_scaled(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1], tail_scale, 1.0);
+            }
+            else
+            {
+                gfx_draw_scaled(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1], 1.0, tail_scale);
+            }
+
+            if (game.tail_dirs[idx][0] == game.tail_dirs[idx-1][0])
+            tail_scale *= 0.99;
         }
     }
 
