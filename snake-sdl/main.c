@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include "delay.h"
 #include "gfx.h"
 #include "input.h"
@@ -105,6 +103,12 @@ void draw_frame_dynamic(bool wipe)
 {
     uint16_t idx = 0;
     float tail_scale = 1.0;
+    GfxElement_t tail_type = GFX_TAIL_STRAIGHT;
+    double angle = 0.0;
+    int8_t x_dir;
+    int8_t y_dir;
+    int8_t next_x_dir;
+    int8_t next_y_dir;
 
     for (idx = 0; idx < TAIL_MAX_LENGTH; idx++)
     {
@@ -116,23 +120,94 @@ void draw_frame_dynamic(bool wipe)
         }
         else
         {
-            if (game.tail_dirs[idx][0] == 0)
+            x_dir = game.tail_dirs[idx][0];
+            y_dir = game.tail_dirs[idx][1];
+
+            if (idx < TAIL_MAX_LENGTH - 1)
             {
-                gfx_draw_scaled(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1], tail_scale, 1.0);
+                next_x_dir = game.tail_dirs[idx+1][0];
+                next_y_dir = game.tail_dirs[idx+1][1];
             }
             else
             {
-                gfx_draw_scaled(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1], 1.0, tail_scale);
+                next_x_dir = x_dir;
+                next_y_dir = y_dir;
             }
 
-            if (game.tail_dirs[idx][0] == game.tail_dirs[idx-1][0])
+            if (x_dir == next_x_dir
+                || y_dir == next_y_dir)
             {
+                tail_type = GFX_TAIL_STRAIGHT;
                 tail_scale *= 0.99;
+
+                if (x_dir == 0)
+                {
+                    angle = 90.0;
+                }
+                else
+                {
+                    angle = 0.0;
+                }
             }
-            else if (tail_scale < 1.0)
+            else
             {
-                tail_scale *= 1.01;
+                tail_type = GFX_TAIL_CORNER;
+
+                if (x_dir == 1)
+                {
+                    if (next_y_dir == 1)
+                    {
+                        // right down
+                        angle = -90.0;
+                    }
+                    else
+                    {
+                        // right up
+                        angle = 0.0;
+                    }
+                }
+                else if (x_dir == -1)
+                {
+                    if (next_y_dir == 1)
+                    {
+                        // left down
+                        angle = 180.0;
+                    }
+                    else
+                    {
+                        // left up
+                        angle = 90.0;
+                    }
+                }
+                else if (y_dir == 1)
+                {
+                    if (next_x_dir == 1)
+                    {
+                        // down right
+                        angle = 90.0;
+                    }
+                    else
+                    {
+                        // down left
+                        angle = 0.0;
+                    }
+                }
+                else if (y_dir == -1)
+                {
+                    if (next_x_dir == 1)
+                    {
+                        // up right
+                        angle = 180.0;
+                    }
+                    else
+                    {
+                        // up left
+                        angle = 270.0;
+                    }
+                }
             }
+
+            gfx_draw_ex(tail_type, game.tail_coords[idx][0], game.tail_coords[idx][1], tail_scale, tail_scale, angle);
         }
     }
 
@@ -156,7 +231,7 @@ void game_over(uint16_t collided_idx)
     for (idx = game.tail_length - 1; idx >= 0; idx--)
     {
         if (idx == collided_idx) continue;
-        gfx_draw(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1]);
+        gfx_draw(GFX_TAIL_STRAIGHT, game.tail_coords[idx][0], game.tail_coords[idx][1]);
         gfx_present();
         delay_ms(gap);
     }
@@ -183,7 +258,7 @@ void game_over(uint16_t collided_idx)
 
     delay_ms(gap*2);
 
-    gfx_draw(GFX_TAIL, game.head_x, game.head_y);
+    gfx_draw(GFX_TAIL_STRAIGHT, game.head_x, game.head_y);
     gfx_present();
     delay_ms(gap*2);
 

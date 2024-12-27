@@ -8,15 +8,16 @@ typedef enum GfxElement
 {
     GFX_NONE = 0,
     GFX_HEAD = 1,
-    GFX_TAIL = 2,
-    GFX_APPLE = 3,
-    GFX_BORDER = 4
+    GFX_TAIL_STRAIGHT = 2,
+    GFX_TAIL_CORNER = 3,
+    GFX_APPLE = 4,
+    GFX_BORDER = 5
 } GfxElement_t;
 
 void gfx_init(int new_window_width, int new_window_height, int new_tile_size);
 void gfx_exit(void);
 void gfx_draw(GfxElement_t element, int x, int y);
-void gfx_draw_scaled(GfxElement_t element, int x, int y, float x_scale, float y_scale);
+void gfx_draw_ex(GfxElement_t element, int x, int y, float x_scale, float y_scale, double angle);
 void gfx_clear(void);
 void gfx_present(void);
 
