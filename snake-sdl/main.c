@@ -41,6 +41,7 @@ typedef struct GameState
     uint16_t tail_length;
     int8_t apple_coords[APPLE_MAX_COUNT][2]; 
     int8_t tail_coords[TAIL_MAX_LENGTH][2];
+    int8_t tail_dirs[TAIL_MAX_LENGTH][2];
 } GameState_t;
 
 /*
@@ -76,7 +77,8 @@ GameState_t game =
     .next_apple_idx = 0,
     .tail_length = 0,
     .apple_coords = {{-1}},
-    .tail_coords = {{-1}}
+    .tail_coords = {{-1}},
+    .tail_dirs = {{-1}}
 };
 
 void gotoxy(uint8_t x, uint8_t y)
@@ -146,13 +148,13 @@ void draw_frame_dynamic(bool wipe)
         {
             gfx_draw(GFX_NONE, game.tail_coords[idx][0], game.tail_coords[idx][1]);
         }
-        else if (game.dir_x == 0)
+        else if (game.tail_dirs[idx][0] == 0)
         {
-            gfx_draw_scaled(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1], 1.0 / (1+(idx/20.0)), 1.0);
+            gfx_draw_scaled(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1], 1.0 / (1+(idx/50.0)), 1.0);
         }
         else
         {
-            gfx_draw_scaled(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1], 1.0, 1.0 / (1+(idx/20.0)));
+            gfx_draw_scaled(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1], 1.0, 1.0 / (1+(idx/50.0)));
         }
     }
 
@@ -426,10 +428,14 @@ void handle_movement(void)
         {
             game.tail_coords[idx][0] = game.tail_coords[idx-1][0];
             game.tail_coords[idx][1] = game.tail_coords[idx-1][1];
+            game.tail_dirs[idx][0] = game.tail_dirs[idx-1][0];
+            game.tail_dirs[idx][1] = game.tail_dirs[idx-1][1];
         }
 
         game.tail_coords[0][0] = game.head_x;
         game.tail_coords[0][1] = game.head_y;
+        game.tail_dirs[0][0] = game.dir_x;
+        game.tail_dirs[0][1] = game.dir_y;
     }
 
     game.head_x += game.dir_x;
