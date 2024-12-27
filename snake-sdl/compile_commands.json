@@ -1,0 +1,38 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "prog",
+      "delay.c"
+    ],
+    "directory": "/home/mickey/Repos/c-practice/snake-sdl",
+    "file": "/home/mickey/Repos/c-practice/snake-sdl/delay.c",
+    "output": "/home/mickey/Repos/c-practice/snake-sdl/prog"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "prog",
+      "gfx.c"
+    ],
+    "directory": "/home/mickey/Repos/c-practice/snake-sdl",
+    "file": "/home/mickey/Repos/c-practice/snake-sdl/gfx.c",
+    "output": "/home/mickey/Repos/c-practice/snake-sdl/prog"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "prog",
+      "main.c"
+    ],
+    "directory": "/home/mickey/Repos/c-practice/snake-sdl",
+    "file": "/home/mickey/Repos/c-practice/snake-sdl/main.c",
+    "output": "/home/mickey/Repos/c-practice/snake-sdl/prog"
+  }
+]
