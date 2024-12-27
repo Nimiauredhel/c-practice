@@ -94,13 +94,20 @@ void print(char *text)
 void clear_frame(void)
 {
     printf("\033[H\033[J");
+    gfx_clear();
 }
 
 void draw_frame_static(void)
 {
-    gfx_clear();
-
     uint16_t idx = 0;
+
+    for (uint16_t x = 0; x < WIDTH+4; x++)
+    {
+        for (uint16_t y = 0; y < HEIGHT+4; y++)
+        {
+            gfx_draw(GFX_NONE, x, y);
+        }
+    }
 
     for (idx = 1; idx <= WIDTH+2; idx++)
     {
@@ -123,14 +130,10 @@ void draw_frame_static(void)
         gfx_draw(GFX_BORDER, 1, idx);
         gfx_draw(GFX_BORDER, WIDTH+2, idx);
     }
-
-    gfx_present();
 }
 
 void draw_frame_dynamic(bool wipe)
 {
-    gfx_clear();
-
     uint16_t idx = 0;
 
     for (idx = 0; idx < TAIL_MAX_LENGTH; idx++)
@@ -139,7 +142,7 @@ void draw_frame_dynamic(bool wipe)
         gotoxy(game.tail_coords[idx][0], game.tail_coords[idx][1]);
         printf("%c", chars[wipe ? 0 : 2]);
 
-        gfx_draw(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1]);
+        gfx_draw(wipe ? GFX_NONE : GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1]);
     }
 
     for (idx = 0; idx < APPLE_MAX_COUNT; idx++)
@@ -148,19 +151,17 @@ void draw_frame_dynamic(bool wipe)
         gotoxy(game.apple_coords[idx][0], game.apple_coords[idx][1]);
         printf("%c", chars[wipe ? 0 : 3]);
 
-        gfx_draw(GFX_APPLE, game.apple_coords[idx][0], game.apple_coords[idx][1]);
+        gfx_draw(wipe ? GFX_NONE : GFX_APPLE, game.apple_coords[idx][0], game.apple_coords[idx][1]);
     }
 
     gotoxy(game.head_x, game.head_y);
     printf("%c", chars[wipe ? 0 : 1]);
-    gfx_draw(GFX_HEAD, game.head_x, game.head_y);
-
-    gfx_present();
+    gfx_draw(wipe ? GFX_NONE : GFX_HEAD, game.head_x, game.head_y);
 }
 
 void game_over(uint16_t collided_idx)
 {
-    uint16_t gap = 50;
+    uint16_t gap = 16;
     int16_t idx = 0;
 
     delay_ms(gap);
@@ -171,6 +172,8 @@ void game_over(uint16_t collided_idx)
         gotoxy(game.tail_coords[idx][0], game.tail_coords[idx][1]);
         printf("%c", ',');
         fflush(stdout);
+        gfx_draw(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1]);
+        gfx_present();
         delay_ms(gap);
     }
 
@@ -182,6 +185,8 @@ void game_over(uint16_t collided_idx)
         gotoxy(game.tail_coords[idx][0], game.tail_coords[idx][1]);
         printf("%c", '.');
         fflush(stdout);
+        gfx_draw(GFX_APPLE, game.tail_coords[idx][0], game.tail_coords[idx][1]);
+        gfx_present();
         delay_ms(gap);
     }
 
@@ -193,6 +198,8 @@ void game_over(uint16_t collided_idx)
         gotoxy(game.tail_coords[idx][0], game.tail_coords[idx][1]);
         printf("%c", ' ');
         fflush(stdout);
+        gfx_draw(GFX_NONE, game.tail_coords[idx][0], game.tail_coords[idx][1]);
+        gfx_present();
         delay_ms(gap);
     }
 
@@ -202,18 +209,24 @@ void game_over(uint16_t collided_idx)
     gotoxy(game.head_x, game.head_y);
     printf("%c", 'x');
     fflush(stdout);
+    gfx_draw(GFX_TAIL, game.head_x, game.head_y);
+    gfx_present();
     delay_ms(gap);
     delay_ms(gap);
 
     gotoxy(game.head_x, game.head_y);
     printf("%c", ',');
     fflush(stdout);
+    gfx_draw(GFX_APPLE, game.head_x, game.head_y);
+    gfx_present();
     delay_ms(gap);
     delay_ms(gap);
 
     gotoxy(game.head_x, game.head_y);
     printf("%c", '.');
     fflush(stdout);
+    gfx_draw(GFX_NONE, game.head_x, game.head_y);
+    gfx_present();
     delay_ms(gap);
     delay_ms(gap);
 
@@ -456,6 +469,7 @@ bool inner_loop(void)
             handle_apple_spawning();
             draw_frame_dynamic(false);
             fflush(stdout);
+            gfx_present();
         }
         else game.ms_since_game_tick += 1;
     }
@@ -490,13 +504,19 @@ void inner_init()
 
     determine_next_apple_pos();
     clear_frame();
+
     draw_frame_static();
+
     fflush(stdin);
-    delay_ms(1);
+    gfx_present();
+    delay_ms(50);
+
     draw_frame_dynamic(false);
     print("h, j, k, l to move, x to quit\n");
+
     fflush(stdin);
-    delay_ms(1);
+    gfx_present();
+    delay_ms(50);
 }
 
 void outer_loop(void)
@@ -525,11 +545,12 @@ void outer_init(void)
     config.c_cc[VTIME] = 0;
 
     tcsetattr(STDIN_FILENO, TCSANOW, &config);
+
+    gfx_init(WIDTH+4, HEIGHT+4, 32);
 }
 
 int main(void)
 {
-    gfx_init();
     outer_init();
     outer_loop();
     gfx_exit();

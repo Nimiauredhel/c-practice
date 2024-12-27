@@ -1,13 +1,17 @@
 #include "gfx.h"
 
-SDL_Window *mainWindow;
-SDL_Renderer *renderer;
+static uint16_t window_width;
+static uint16_t window_height;
+static uint16_t tile_size;
 
-SDL_Texture *texture_bg;
-SDL_Texture *texture_head;
-SDL_Texture *texture_tail;
-SDL_Texture *texture_apple;
-SDL_Texture *texture_border;
+static SDL_Window *mainWindow;
+static SDL_Renderer *renderer;
+
+static SDL_Texture *texture_bg;
+static SDL_Texture *texture_head;
+static SDL_Texture *texture_tail;
+static SDL_Texture *texture_apple;
+static SDL_Texture *texture_border;
 
 static void load_texture(char *path, SDL_Texture **texture_ptr)
 {
@@ -23,14 +27,18 @@ static void render_texture(SDL_Texture *texture, int x, int y)
     SDL_RenderCopy(renderer, texture, NULL, &destination);
 }
 
-void gfx_init(void)
+void gfx_init(int new_window_width, int new_window_height, int new_tile_size)
 {
+    window_width = new_window_width;
+    window_height = new_window_height;
+    tile_size = new_tile_size;
     char * title = "Test Window";
+
     SDL_Init(SDL_INIT_VIDEO);
-    mainWindow = SDL_CreateWindow(title, 0, 0, 1280, 720, SDL_WINDOW_SHOWN);
+    mainWindow = SDL_CreateWindow(title, 0, 0, window_width*tile_size, window_height*tile_size, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(mainWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-    load_texture("sample.bmp", &texture_bg);
+    load_texture("bg.bmp", &texture_bg);
     load_texture("head.bmp", &texture_head);
     load_texture("tail.bmp", &texture_tail);
     load_texture("apple.bmp", &texture_apple);
@@ -39,6 +47,7 @@ void gfx_init(void)
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture_bg, NULL, NULL);
     SDL_RenderPresent(renderer);
+    SDL_RaiseWindow(mainWindow);
 }
 
 void gfx_exit(void)
@@ -61,7 +70,8 @@ void gfx_draw(GfxElement_t element, int x, int y)
     switch (element) 
     {
         case GFX_NONE:
-            return;
+            texture = texture_bg;
+            break;
         case GFX_HEAD:
             texture = texture_head;
             break;
@@ -78,7 +88,7 @@ void gfx_draw(GfxElement_t element, int x, int y)
             return;
     }
 
-    render_texture(texture, x * 32, y * 32);
+    render_texture(texture, x * tile_size, y * tile_size);
 }
 
 void gfx_clear(void)

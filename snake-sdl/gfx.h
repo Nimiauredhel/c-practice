@@ -13,7 +13,7 @@ typedef enum GfxElement
     GFX_BORDER = 4
 } GfxElement_t;
 
-void gfx_init(void);
+void gfx_init(int new_window_width, int new_window_height, int new_tile_size);
 void gfx_exit(void);
 void gfx_draw(GfxElement_t element, int x, int y);
 void gfx_clear(void);
