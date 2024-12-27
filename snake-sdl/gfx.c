@@ -43,7 +43,7 @@ void gfx_init(int new_window_width, int new_window_height, int new_tile_size)
     tile_size = new_tile_size;
     char * title = "Test Window";
 
-    SDL_Init(SDL_INIT_VIDEO);
+    SDL_VideoInit(NULL);
     mainWindow = SDL_CreateWindow(title, 0, 0, window_width*tile_size, window_height*tile_size, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(mainWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
@@ -69,7 +69,6 @@ void gfx_exit(void)
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(mainWindow);
-    SDL_Quit();
 }
 
 void gfx_draw(GfxElement_t element, int x, int y)

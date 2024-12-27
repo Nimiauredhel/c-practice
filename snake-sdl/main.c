@@ -4,12 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <poll.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <termios.h>
 #include "delay.h"
 #include "gfx.h"
+#include "input.h"
 
 /*
  * game defs
@@ -45,22 +44,8 @@ typedef struct GameState
 } GameState_t;
 
 /*
- * system vars
- */
-
-struct pollfd pollReq =
-{
-    .fd = STDIN_FILENO,
-    .events = POLLIN
-};
-
-struct termios config;
-
-/*
  * game vars
  */
-
-const char chars[5] = {' ', 'O', 'o', '@', 'X'};
 
 GameState_t game =
 {
@@ -81,21 +66,13 @@ GameState_t game =
     .tail_dirs = {{-1}}
 };
 
-void gotoxy(uint8_t x, uint8_t y)
-{
-    printf("\033[%d;%dH", (y), (x));
-}
-
 void print(char *text)
 {
-    gotoxy(LOGLINE_X, LOGLINE_Y);
-    printf("%s", text);
-    fflush(stdin);
+    printf("%s\n", text);
 }
 
 void clear_frame(void)
 {
-    printf("\033[H\033[J");
     gfx_clear();
 }
 
@@ -113,22 +90,12 @@ void draw_frame_static(void)
 
     for (idx = 1; idx <= WIDTH+2; idx++)
     {
-        gotoxy(idx, 1);
-        printf("%c", chars[4]);
-        gotoxy(idx, HEIGHT+2);
-        printf("%c", chars[4]);
-
         gfx_draw(GFX_BORDER, idx, 1);
         gfx_draw(GFX_BORDER, idx, HEIGHT+2);
     }
 
     for (idx = 1; idx <= HEIGHT+2; idx++)
     {
-        gotoxy(1, idx);
-        printf("%c", chars[4]);
-        gotoxy(WIDTH+2, idx);
-        printf("%c", chars[4]);
-
         gfx_draw(GFX_BORDER, 1, idx);
         gfx_draw(GFX_BORDER, WIDTH+2, idx);
     }
@@ -142,8 +109,6 @@ void draw_frame_dynamic(bool wipe)
     for (idx = 0; idx < TAIL_MAX_LENGTH; idx++)
     {
         if (game.tail_coords[idx][0] < 0) break;
-        gotoxy(game.tail_coords[idx][0], game.tail_coords[idx][1]);
-        printf("%c", chars[wipe ? 0 : 2]);
 
         if (wipe)
         {
@@ -161,21 +126,23 @@ void draw_frame_dynamic(bool wipe)
             }
 
             if (game.tail_dirs[idx][0] == game.tail_dirs[idx-1][0])
-            tail_scale *= 0.99;
+            {
+                tail_scale *= 0.99;
+            }
+            else if (tail_scale < 1.0)
+            {
+                tail_scale *= 1.01;
+            }
         }
     }
 
     for (idx = 0; idx < APPLE_MAX_COUNT; idx++)
     {
         if (game.apple_coords[idx][0] < 0) continue;
-        gotoxy(game.apple_coords[idx][0], game.apple_coords[idx][1]);
-        printf("%c", chars[wipe ? 0 : 3]);
 
         gfx_draw(wipe ? GFX_NONE : GFX_APPLE, game.apple_coords[idx][0], game.apple_coords[idx][1]);
     }
 
-    gotoxy(game.head_x, game.head_y);
-    printf("%c", chars[wipe ? 0 : 1]);
     gfx_draw(wipe ? GFX_NONE : GFX_HEAD, game.head_x, game.head_y);
 }
 
@@ -189,9 +156,6 @@ void game_over(uint16_t collided_idx)
     for (idx = game.tail_length - 1; idx >= 0; idx--)
     {
         if (idx == collided_idx) continue;
-        gotoxy(game.tail_coords[idx][0], game.tail_coords[idx][1]);
-        printf("%c", ',');
-        fflush(stdout);
         gfx_draw(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1]);
         gfx_present();
         delay_ms(gap);
@@ -202,9 +166,6 @@ void game_over(uint16_t collided_idx)
     for (idx = game.tail_length - 1; idx >= 0; idx--)
     {
         if (idx == collided_idx) continue;
-        gotoxy(game.tail_coords[idx][0], game.tail_coords[idx][1]);
-        printf("%c", '.');
-        fflush(stdout);
         gfx_draw(GFX_APPLE, game.tail_coords[idx][0], game.tail_coords[idx][1]);
         gfx_present();
         delay_ms(gap);
@@ -215,68 +176,63 @@ void game_over(uint16_t collided_idx)
     for (idx = game.tail_length - 1; idx >= 0; idx--)
     {
         if (idx == collided_idx) continue;
-        gotoxy(game.tail_coords[idx][0], game.tail_coords[idx][1]);
-        printf("%c", ' ');
-        fflush(stdout);
         gfx_draw(GFX_NONE, game.tail_coords[idx][0], game.tail_coords[idx][1]);
         gfx_present();
         delay_ms(gap);
     }
 
-    delay_ms(gap);
-    delay_ms(gap);
+    delay_ms(gap*2);
 
-    gotoxy(game.head_x, game.head_y);
-    printf("%c", 'x');
-    fflush(stdout);
     gfx_draw(GFX_TAIL, game.head_x, game.head_y);
     gfx_present();
-    delay_ms(gap);
-    delay_ms(gap);
+    delay_ms(gap*2);
 
-    gotoxy(game.head_x, game.head_y);
-    printf("%c", ',');
-    fflush(stdout);
     gfx_draw(GFX_APPLE, game.head_x, game.head_y);
     gfx_present();
-    delay_ms(gap);
-    delay_ms(gap);
+    delay_ms(gap*2);
 
-    gotoxy(game.head_x, game.head_y);
-    printf("%c", '.');
-    fflush(stdout);
     gfx_draw(GFX_NONE, game.head_x, game.head_y);
     gfx_present();
-    delay_ms(gap);
-    delay_ms(gap);
+    delay_ms(gap*2);
 
     print("-------- Game Over --------\n");
-    poll(&pollReq, 1, -1);
+    SDL_PollEvent(NULL);
 }
 
-bool handle_input(void)
+bool handle_input(SDL_Event *e)
 {
-    char input = getchar();
-
-    switch (input)
+    switch (e->type)
     {
-        case 'h':
+        case SDL_QUIT:
+        case SDL_APP_TERMINATING:
+            return true;
+        case SDL_KEYDOWN:
+            break;
+        case SDL_KEYUP:
+        default:
+            return false;
+    }
+
+    switch (e->key.keysym.sym)
+    {
+        case SDLK_h:
             game.dir_x = -1;
             game.dir_y = 0;
             break;
-        case 'j':
+        case SDLK_j:
             game.dir_x = 0;
             game.dir_y = 1;
             break;
-        case 'k':
+        case SDLK_k:
             game.dir_x = 0;
             game.dir_y = -1;
             break;
-        case 'l':
+        case SDLK_l:
             game.dir_x = 1;
             game.dir_y = 0;
             break;
-        case 'x':
+        case SDLK_x:
+        case SDLK_ESCAPE:
             return true;
         default:
             return false;
@@ -469,9 +425,11 @@ bool inner_loop(void)
         {
             game.ms_since_input_tick = 0;
 
-            if(poll(&pollReq, 1, 0))
+            SDL_Event e;
+
+            if(SDL_PollEvent(&e))
             {
-                if(handle_input())
+                if(handle_input(&e))
                 {
                     print("Thank you for playing! --------\n");
                     return true;
@@ -556,21 +514,8 @@ void outer_init(void)
 {
     srand(time(NULL));
 
-    // configure termios
-    if (tcgetattr(STDIN_FILENO, &config) < 0)
-    {
-        // TODO: error handling
-    }
-
-    config.c_cflag |= (CLOCAL | CREAD);
-    config.c_lflag &= ~(ICANON | ECHO | ECHOE);
-    config.c_oflag &= ~OPOST;
-    config.c_cc[VMIN] = 1;
-    config.c_cc[VTIME] = 0;
-
-    tcsetattr(STDIN_FILENO, TCSANOW, &config);
-
     gfx_init(WIDTH+4, HEIGHT+4, 32);
+    input_init();
 }
 
 int main(void)
@@ -578,4 +523,6 @@ int main(void)
     outer_init();
     outer_loop();
     gfx_exit();
+
+    SDL_Quit();
 }

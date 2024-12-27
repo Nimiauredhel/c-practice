@@ -29,6 +29,18 @@
       "-c",
       "-o",
       "program",
+      "input.c"
+    ],
+    "directory": "/home/mickey/Repos/c-practice/snake-sdl",
+    "file": "/home/mickey/Repos/c-practice/snake-sdl/input.c",
+    "output": "/home/mickey/Repos/c-practice/snake-sdl/program"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-o",
+      "program",
       "main.c"
     ],
     "directory": "/home/mickey/Repos/c-practice/snake-sdl",
