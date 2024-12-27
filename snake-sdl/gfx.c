@@ -27,6 +27,15 @@ static void render_texture(SDL_Texture *texture, int x, int y)
     SDL_RenderCopy(renderer, texture, NULL, &destination);
 }
 
+static void render_texture_scaled(SDL_Texture *texture, int x, int y, float x_scale, float y_scale)
+{
+    SDL_Rect destination = {.x = x, .y = y};
+    SDL_QueryTexture(texture, NULL, NULL, &destination.w, &destination.h);
+    destination.w *= x_scale;
+    destination.h *= y_scale;
+    SDL_RenderCopy(renderer, texture, NULL, &destination);
+}
+
 void gfx_init(int new_window_width, int new_window_height, int new_tile_size)
 {
     window_width = new_window_width;
@@ -89,6 +98,34 @@ void gfx_draw(GfxElement_t element, int x, int y)
     }
 
     render_texture(texture, x * tile_size, y * tile_size);
+}
+
+void gfx_draw_scaled(GfxElement_t element, int x, int y, float x_scale, float y_scale)
+{
+    SDL_Texture *texture;
+
+    switch (element) 
+    {
+        case GFX_NONE:
+            texture = texture_bg;
+            break;
+        case GFX_HEAD:
+            texture = texture_head;
+            break;
+        case GFX_TAIL:
+            texture = texture_tail;
+            break;
+        case GFX_APPLE:
+            texture = texture_apple;
+            break;
+        case GFX_BORDER:
+            texture = texture_border;
+            break;
+        default:
+            return;
+    }
+
+    render_texture_scaled(texture, x * tile_size + (tile_size - x_scale * tile_size), y * tile_size + (tile_size - y_scale * tile_size), x_scale, y_scale);
 }
 
 void gfx_clear(void)

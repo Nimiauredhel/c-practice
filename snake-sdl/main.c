@@ -142,7 +142,18 @@ void draw_frame_dynamic(bool wipe)
         gotoxy(game.tail_coords[idx][0], game.tail_coords[idx][1]);
         printf("%c", chars[wipe ? 0 : 2]);
 
-        gfx_draw(wipe ? GFX_NONE : GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1]);
+        if (wipe)
+        {
+            gfx_draw(GFX_NONE, game.tail_coords[idx][0], game.tail_coords[idx][1]);
+        }
+        else if (game.dir_x == 0)
+        {
+            gfx_draw_scaled(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1], 1.0 / (1+(idx/20.0)), 1.0);
+        }
+        else
+        {
+            gfx_draw_scaled(GFX_TAIL, game.tail_coords[idx][0], game.tail_coords[idx][1], 1.0, 1.0 / (1+(idx/20.0)));
+        }
     }
 
     for (idx = 0; idx < APPLE_MAX_COUNT; idx++)

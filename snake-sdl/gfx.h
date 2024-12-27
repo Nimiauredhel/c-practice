@@ -16,6 +16,7 @@ typedef enum GfxElement
 void gfx_init(int new_window_width, int new_window_height, int new_tile_size);
 void gfx_exit(void);
 void gfx_draw(GfxElement_t element, int x, int y);
+void gfx_draw_scaled(GfxElement_t element, int x, int y, float x_scale, float y_scale);
 void gfx_clear(void);
 void gfx_present(void);
 
