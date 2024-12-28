@@ -293,18 +293,30 @@ bool handle_input(SDL_Event *e)
     switch (e->key.keysym.sym)
     {
         case SDLK_h:
+        case SDLK_LEFT:
+        case SDLK_a:
+            if (game.dir_x != 0) return false;
             game.dir_x = -1;
             game.dir_y = 0;
             break;
         case SDLK_j:
+        case SDLK_DOWN:
+        case SDLK_s:
+            if (game.dir_y != 0) return false;
             game.dir_x = 0;
             game.dir_y = 1;
             break;
         case SDLK_k:
+        case SDLK_UP:
+        case SDLK_w:
+            if (game.dir_y != 0) return false;
             game.dir_x = 0;
             game.dir_y = -1;
             break;
         case SDLK_l:
+        case SDLK_RIGHT:
+        case SDLK_d:
+            if (game.dir_x != 0) return false;
             game.dir_x = 1;
             game.dir_y = 0;
             break;
