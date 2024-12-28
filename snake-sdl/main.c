@@ -36,6 +36,7 @@ typedef struct GameState
     uint8_t next_apple_y;
     int8_t next_apple_idx;
     uint16_t tail_length;
+    char current_message[64];
     int8_t apple_coords[APPLE_MAX_COUNT][2]; 
     int8_t tail_coords[TAIL_MAX_LENGTH][2];
     int8_t tail_dirs[TAIL_MAX_LENGTH][2];
@@ -63,11 +64,6 @@ GameState_t game =
     .tail_coords = {{-1}},
     .tail_dirs = {{-1}}
 };
-
-void print(char *text)
-{
-    printf("%s\n", text);
-}
 
 void clear_frame(void)
 {
@@ -272,7 +268,8 @@ void game_over(uint16_t collided_idx)
     gfx_present();
     delay_ms(gap*2);
 
-    print("-------- Game Over --------\n");
+    sprintf(game.current_message, "-- Game Over --");
+    printf("-------- Game Over --------\n");
     SDL_PollEvent(NULL);
 }
 
@@ -378,10 +375,6 @@ void determine_next_apple_pos(void)
 
     game.next_apple_x = next_x;
     game.next_apple_y = next_y;
-
-    //char next_apple_string[] = "Apple Next X: xx, Y: xx";
-    //sprintf(next_apple_string, "Apple Next X: %2u, Y: %2u", next_x, next_y);
-    //print(next_apple_string);
 }
 
 void handle_apple_spawning(void)
@@ -424,9 +417,7 @@ void handle_apple_collision(uint8_t apple_idx)
     game.next_apple_idx = apple_idx;
     game.ms_since_apple_spawn = 0;
 
-    char tail_length_string[] = "Tail Length:   0   \n";
-    sprintf(tail_length_string, "Tail Length: %3u   \n", game.tail_length);
-    print(tail_length_string);
+    sprintf(game.current_message, "Tail Length: %3u", game.tail_length);
 }
 
 bool detect_collision(void)
@@ -503,14 +494,12 @@ void handle_movement(void)
 bool inner_loop(void)
 {
     //char status[] = "GAME: XX, INPUT: XX";
-    static const uint8_t clear_after_x_draws = 10;
+    static const uint8_t clear_after_x_draws = 4;
     uint8_t draw_counter = 0;
 
     while(true)
     {
         delay_ms(1);
-        //sprintf(status, "Game: %2u, Input: %2u", game.ms_since_game_tick, game.ms_since_input_tick);
-        //print(status);
 
         if (game.ms_since_input_tick >= INPUT_TICK_MS)
         {
@@ -522,7 +511,12 @@ bool inner_loop(void)
             {
                 if(handle_input(&e))
                 {
-                    print("Thank you for playing! --------\n");
+                    sprintf(game.current_message, "Thank you for playing!");
+                    printf("Thank you for playing! --------\n");
+                    gfx_clear();
+                    render_text(game.current_message);
+                    gfx_present();
+                    delay_ms(1000);
                     return true;
                 }
             }
@@ -542,6 +536,7 @@ bool inner_loop(void)
                 draw_counter = 0;
                 gfx_clear();
                 draw_frame_static();
+                render_text(game.current_message);
             }
             else
             {
@@ -576,9 +571,12 @@ void inner_init()
     game.tail_length = 0;
     game.next_apple_idx = 0;
 
+    memset(game.current_message, '\0', 64);
+
     for (idx = 0; idx < TAIL_MAX_LENGTH; idx++)
     {
         memset(game.tail_coords[idx], -1, 2);
+        memset(game.tail_dirs[idx], 0, 2);
     }
 
     for (idx = 0; idx < APPLE_MAX_COUNT; idx++)
@@ -596,11 +594,13 @@ void inner_init()
     delay_ms(50);
 
     draw_frame_dynamic(false);
-    print("h, j, k, l to move, x to quit\n");
+    sprintf(game.current_message, "h, j, k, l to move, x to quit.");
+    printf("h, j, k, l to move, x to quit\n");
+    render_text(game.current_message);
 
     fflush(stdin);
     gfx_present();
-    delay_ms(50);
+    delay_ms(150);
 }
 
 void outer_loop(void)

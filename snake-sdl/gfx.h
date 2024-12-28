@@ -3,6 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
+#include <SDL2/SDL_ttf.h>
 
 typedef enum GfxElement
 {
@@ -20,5 +21,6 @@ void gfx_draw(GfxElement_t element, int x, int y);
 void gfx_draw_ex(GfxElement_t element, int x, int y, float x_scale, float y_scale, double angle);
 void gfx_clear(void);
 void gfx_present(void);
+void render_text(const char* text);
 
 #endif

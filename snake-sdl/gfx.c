@@ -1,5 +1,7 @@
 #include "gfx.h"
 
+static const SDL_Color WHITE = { 255, 255, 255, 255 };
+
 static uint16_t window_width;
 static uint16_t window_height;
 static uint16_t tile_size;
@@ -13,6 +15,9 @@ static SDL_Texture *texture_tail_straight;
 static SDL_Texture *texture_tail_corner;
 static SDL_Texture *texture_apple;
 static SDL_Texture *texture_border;
+
+static SDL_Texture *text_texture;
+static TTF_Font *font_sans;
 
 static void load_texture(char *path, SDL_Texture **texture_ptr)
 {
@@ -44,6 +49,7 @@ void gfx_init(int new_window_width, int new_window_height, int new_tile_size)
     tile_size = new_tile_size;
     char * title = "Test Window";
 
+    TTF_Init();
     SDL_VideoInit(NULL);
     mainWindow = SDL_CreateWindow(title, 0, 0, window_width*tile_size, window_height*tile_size, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(mainWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -54,6 +60,8 @@ void gfx_init(int new_window_width, int new_window_height, int new_tile_size)
     load_texture("tail_corner.bmp", &texture_tail_corner);
     load_texture("apple.bmp", &texture_apple);
     load_texture("border.bmp", &texture_border);
+
+    font_sans = TTF_OpenFont("OpenSans-Regular.ttf", 48);
 
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture_bg, NULL, NULL);
@@ -142,3 +150,15 @@ void gfx_present(void)
 {
     SDL_RenderPresent(renderer);
 }
+
+void render_text(const char* text)
+{
+    SDL_Surface *textSurface = TTF_RenderText_Solid(font_sans, text, WHITE);
+    text_texture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_Rect text_rect = 
+    {
+        128, 16, 256, 64
+    };
+    SDL_RenderCopy(renderer, text_texture, NULL, &text_rect);
+}
+
