@@ -102,7 +102,7 @@ void draw_frame_static(void)
 void draw_frame_dynamic(bool wipe)
 {
     uint16_t idx = 0;
-    float tail_scale = 1.0;
+    float tail_scale = 0.95;
     GfxElement_t tail_type = GFX_TAIL_STRAIGHT;
     double angle = 0.0;
     int8_t x_dir;
@@ -134,11 +134,12 @@ void draw_frame_dynamic(bool wipe)
                 next_y_dir = y_dir;
             }
 
+            tail_scale *= 0.99;
+
             if (x_dir == next_x_dir
                 || y_dir == next_y_dir)
             {
                 tail_type = GFX_TAIL_STRAIGHT;
-                tail_scale *= 0.99;
 
                 if (x_dir == 0)
                 {
@@ -207,7 +208,7 @@ void draw_frame_dynamic(bool wipe)
                 }
             }
 
-            gfx_draw_ex(tail_type, game.tail_coords[idx][0], game.tail_coords[idx][1], tail_scale, tail_scale, angle);
+            gfx_draw_ex(tail_type, game.tail_coords[idx][0], game.tail_coords[idx][1], 1.0, tail_scale, angle);
         }
     }
 
@@ -490,6 +491,8 @@ void handle_movement(void)
 bool inner_loop(void)
 {
     //char status[] = "GAME: XX, INPUT: XX";
+    static const uint8_t clear_after_x_draws = 10;
+    uint8_t draw_counter = 0;
 
     while(true)
     {
@@ -521,6 +524,17 @@ bool inner_loop(void)
             game.ms_since_game_tick = 0;
 
             if (detect_collision()) break;
+
+            if (draw_counter >= clear_after_x_draws)
+            {
+                draw_counter = 0;
+                gfx_clear();
+                draw_frame_static();
+            }
+            else
+            {
+                draw_counter++;
+            }
 
             draw_frame_dynamic(true);
             handle_movement();
