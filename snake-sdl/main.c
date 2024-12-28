@@ -7,6 +7,7 @@
 #include "delay.h"
 #include "gfx.h"
 #include "input.h"
+#include "audio.h"
 
 /*
  * game defs
@@ -430,6 +431,7 @@ void handle_apple_collision(uint8_t apple_idx)
     game.ms_since_apple_spawn = 0;
 
     sprintf(game.current_message, "Tail Length: %3u", game.tail_length);
+    audio_play_sfx();
 }
 
 bool detect_collision(void)
@@ -629,6 +631,7 @@ void outer_init(void)
     srand(time(NULL));
 
     gfx_init(WIDTH+4, HEIGHT+4, 32);
+    audio_init();
     input_init();
 }
 

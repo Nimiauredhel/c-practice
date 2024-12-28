@@ -3,6 +3,26 @@
     "arguments": [
       "/usr/bin/gcc",
       "-c",
+      "-std=c99",
+      "-Wall",
+      "-pedantic",
+      "-Wextra",
+      "-o",
+      "program",
+      "audio.c"
+    ],
+    "directory": "/home/mickey/Repos/c-practice/snake-sdl",
+    "file": "/home/mickey/Repos/c-practice/snake-sdl/audio.c",
+    "output": "/home/mickey/Repos/c-practice/snake-sdl/program"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-std=c99",
+      "-Wall",
+      "-pedantic",
+      "-Wextra",
       "-o",
       "program",
       "delay.c"
@@ -15,6 +35,10 @@
     "arguments": [
       "/usr/bin/gcc",
       "-c",
+      "-std=c99",
+      "-Wall",
+      "-pedantic",
+      "-Wextra",
       "-o",
       "program",
       "gfx.c"
@@ -27,6 +51,10 @@
     "arguments": [
       "/usr/bin/gcc",
       "-c",
+      "-std=c99",
+      "-Wall",
+      "-pedantic",
+      "-Wextra",
       "-o",
       "program",
       "input.c"
@@ -39,6 +67,10 @@
     "arguments": [
       "/usr/bin/gcc",
       "-c",
+      "-std=c99",
+      "-Wall",
+      "-pedantic",
+      "-Wextra",
       "-o",
       "program",
       "main.c"
