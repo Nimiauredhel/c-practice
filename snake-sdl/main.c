@@ -237,6 +237,8 @@ void game_over(uint16_t collided_idx)
     uint16_t gap = 16;
     int16_t idx = 0;
 
+    audio_play_sfx(SFX_GAME_OVER);
+
     delay_ms(gap);
 
     for (idx = game.tail_length - 1; idx >= 0; idx--)
@@ -413,6 +415,8 @@ void handle_apple_spawning(void)
                     break;
                 }
             }
+
+            audio_play_sfx(SFX_APPLE_SPAWN);
         }
         else 
         {
@@ -431,7 +435,7 @@ void handle_apple_collision(uint8_t apple_idx)
     game.ms_since_apple_spawn = 0;
 
     sprintf(game.current_message, "Tail Length: %3u", game.tail_length);
-    audio_play_sfx();
+    audio_play_sfx(SFX_PICKUP);
 }
 
 bool detect_collision(void)
