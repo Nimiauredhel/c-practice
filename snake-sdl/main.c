@@ -218,7 +218,8 @@ void draw_frame_dynamic(bool wipe)
         gfx_draw(wipe ? GFX_NONE : GFX_APPLE, game.apple_coords[idx][0], game.apple_coords[idx][1]);
     }
 
-    gfx_draw(wipe ? GFX_NONE : GFX_HEAD, game.head_x, game.head_y);
+    gfx_draw_ex(wipe ? GFX_NONE : GFX_HEAD, game.head_x, game.head_y, 1.0, 1.0,
+            game.dir_x == 1 ? 180.0 : game.dir_x == -1 ? 0.0 : game.dir_y == 1 ? -90.0 : 90.0);
 }
 
 void game_over(uint16_t collided_idx)
