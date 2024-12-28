@@ -98,7 +98,8 @@ void draw_frame_static(void)
 void draw_frame_dynamic(bool wipe)
 {
     uint16_t idx = 0;
-    float tail_scale = 0.95;
+    float tail_scale = 1.0;
+    float tail_scale_modifier = -0.02;
     GfxElement_t tail_type = GFX_TAIL_STRAIGHT;
     double angle = 0.0;
     int8_t x_dir;
@@ -106,7 +107,7 @@ void draw_frame_dynamic(bool wipe)
     int8_t next_x_dir;
     int8_t next_y_dir;
 
-    for (idx = 0; idx < TAIL_MAX_LENGTH; idx++)
+    for (idx = 0; idx < game.tail_length; idx++)
     {
         if (game.tail_coords[idx][0] < 0) break;
 
@@ -119,7 +120,7 @@ void draw_frame_dynamic(bool wipe)
             x_dir = game.tail_dirs[idx][0];
             y_dir = game.tail_dirs[idx][1];
 
-            if (idx < TAIL_MAX_LENGTH - 1)
+            if (idx < game.tail_length - 1)
             {
                 next_x_dir = game.tail_dirs[idx+1][0];
                 next_y_dir = game.tail_dirs[idx+1][1];
@@ -130,21 +131,32 @@ void draw_frame_dynamic(bool wipe)
                 next_y_dir = y_dir;
             }
 
-            tail_scale *= 0.99;
+            tail_scale += tail_scale_modifier;
+            tail_scale_modifier *= -1;
+            tail_scale -= 0.01;
 
-            if (x_dir == next_x_dir
+            if (x_dir == 1)
+            {
+                angle = 180.0;
+            }
+            else if (x_dir == -1)
+            {
+                angle = 0.0;
+            }
+            else if (y_dir == 1)
+            {
+                angle = 270.0;
+            }
+            else angle = 90.0;
+
+            if (idx == game.tail_length - 1)
+            {
+                tail_type = GFX_TAIL_END;
+            }
+            else if (x_dir == next_x_dir
                 || y_dir == next_y_dir)
             {
                 tail_type = GFX_TAIL_STRAIGHT;
-
-                if (x_dir == 0)
-                {
-                    angle = 90.0;
-                }
-                else
-                {
-                    angle = 0.0;
-                }
             }
             else
             {
@@ -568,7 +580,7 @@ void inner_init()
     game.dir_x = 0;
     game.dir_y = 0;
     game.ms_since_apple_spawn = 0;
-    game.tail_length = 0;
+    game.tail_length = 1;
     game.next_apple_idx = 0;
 
     memset(game.current_message, '\0', 64);

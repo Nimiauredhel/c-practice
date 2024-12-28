@@ -11,8 +11,9 @@ typedef enum GfxElement
     GFX_HEAD = 1,
     GFX_TAIL_STRAIGHT = 2,
     GFX_TAIL_CORNER = 3,
-    GFX_APPLE = 4,
-    GFX_BORDER = 5
+    GFX_TAIL_END = 4,
+    GFX_APPLE = 5,
+    GFX_BORDER = 6
 } GfxElement_t;
 
 void gfx_init(int new_window_width, int new_window_height, int new_tile_size);

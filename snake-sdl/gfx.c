@@ -13,6 +13,7 @@ static SDL_Texture *texture_bg;
 static SDL_Texture *texture_head;
 static SDL_Texture *texture_tail_straight;
 static SDL_Texture *texture_tail_corner;
+static SDL_Texture *texture_tail_end;
 static SDL_Texture *texture_apple;
 static SDL_Texture *texture_border;
 
@@ -58,6 +59,7 @@ void gfx_init(int new_window_width, int new_window_height, int new_tile_size)
     load_texture("head.bmp", &texture_head);
     load_texture("tail_straight.bmp", &texture_tail_straight);
     load_texture("tail_corner.bmp", &texture_tail_corner);
+    load_texture("tail_end.bmp", &texture_tail_end);
     load_texture("apple.bmp", &texture_apple);
     load_texture("border.bmp", &texture_border);
 
@@ -97,6 +99,9 @@ void gfx_draw(GfxElement_t element, int x, int y)
         case GFX_TAIL_STRAIGHT:
             texture = texture_tail_straight;
             break;
+        case GFX_TAIL_END:
+            texture = texture_tail_end;
+            break;
         case GFX_APPLE:
             texture = texture_apple;
             break;
@@ -127,6 +132,9 @@ void gfx_draw_ex(GfxElement_t element, int x, int y, float x_scale, float y_scal
             break;
         case GFX_TAIL_CORNER:
             texture = texture_tail_corner;
+            break;
+        case GFX_TAIL_END:
+            texture = texture_tail_end;
             break;
         case GFX_APPLE:
             texture = texture_apple;
