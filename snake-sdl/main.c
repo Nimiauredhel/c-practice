@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "delay.h"
 #include "gfx.h"
 #include "input.h"
 #include "audio.h"
@@ -239,49 +238,49 @@ void game_over(uint16_t collided_idx)
 
     audio_play_sfx(SFX_GAME_OVER);
 
-    delay_ms(gap);
+    SDL_Delay(gap);
 
     for (idx = game.tail_length - 1; idx >= 0; idx--)
     {
         if (idx == collided_idx) continue;
         gfx_draw(GFX_TAIL_STRAIGHT, game.tail_coords[idx][0], game.tail_coords[idx][1]);
         gfx_present();
-        delay_ms(gap);
+        SDL_Delay(gap);
     }
 
-    delay_ms(gap);
+    SDL_Delay(gap);
 
     for (idx = game.tail_length - 1; idx >= 0; idx--)
     {
         if (idx == collided_idx) continue;
         gfx_draw(GFX_APPLE, game.tail_coords[idx][0], game.tail_coords[idx][1]);
         gfx_present();
-        delay_ms(gap);
+        SDL_Delay(gap);
     }
 
-    delay_ms(gap);
+    SDL_Delay(gap);
 
     for (idx = game.tail_length - 1; idx >= 0; idx--)
     {
         if (idx == collided_idx) continue;
         gfx_draw(GFX_NONE, game.tail_coords[idx][0], game.tail_coords[idx][1]);
         gfx_present();
-        delay_ms(gap);
+        SDL_Delay(gap);
     }
 
-    delay_ms(gap*2);
+    SDL_Delay(gap*2);
 
     gfx_draw(GFX_TAIL_STRAIGHT, game.head_x, game.head_y);
     gfx_present();
-    delay_ms(gap*2);
+    SDL_Delay(gap*2);
 
     gfx_draw(GFX_APPLE, game.head_x, game.head_y);
     gfx_present();
-    delay_ms(gap*2);
+    SDL_Delay(gap*2);
 
     gfx_draw(GFX_NONE, game.head_x, game.head_y);
     gfx_present();
-    delay_ms(gap*2);
+    SDL_Delay(gap*2);
 
     sprintf(game.current_message, "-- Game Over --");
     printf("-------- Game Over --------\n");
@@ -517,7 +516,7 @@ bool inner_loop(void)
 
     while(true)
     {
-        delay_ms(1);
+        SDL_Delay(1);
 
         if (game.ms_since_input_tick >= INPUT_TICK_MS)
         {
@@ -534,7 +533,7 @@ bool inner_loop(void)
                     gfx_clear();
                     render_text(game.current_message);
                     gfx_present();
-                    delay_ms(1000);
+                    SDL_Delay(1000);
                     return true;
                 }
             }
@@ -609,7 +608,7 @@ void inner_init()
 
     fflush(stdin);
     gfx_present();
-    delay_ms(50);
+    SDL_Delay(50);
 
     draw_frame_dynamic(false);
     sprintf(game.current_message, "h, j, k, l to move, x to quit.");
@@ -618,7 +617,7 @@ void inner_init()
 
     fflush(stdin);
     gfx_present();
-    delay_ms(150);
+    SDL_Delay(150);
 }
 
 void outer_loop(void)

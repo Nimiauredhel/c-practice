@@ -25,22 +25,6 @@
       "-Wextra",
       "-o",
       "program",
-      "delay.c"
-    ],
-    "directory": "/home/mickey/Repos/c-practice/snake-sdl",
-    "file": "/home/mickey/Repos/c-practice/snake-sdl/delay.c",
-    "output": "/home/mickey/Repos/c-practice/snake-sdl/program"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-c",
-      "-std=c99",
-      "-Wall",
-      "-pedantic",
-      "-Wextra",
-      "-o",
-      "program",
       "gfx.c"
     ],
     "directory": "/home/mickey/Repos/c-practice/snake-sdl",
