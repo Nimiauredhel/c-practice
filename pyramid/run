@@ -1,3 +1,0 @@
-#!/usr/bin/bash
-
-gcc program.c -o program.o; ./program.o
