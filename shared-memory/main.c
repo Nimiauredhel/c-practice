@@ -57,11 +57,9 @@ void create_shm(void)
 
     printf("SHM and list created.\n");
 
-    printf("Press enter to finish.\n");
-    getchar();
-
     // detach share memory
     shmdt(shm_ptr);
+    printf("Detached from shared memory.\n");
 }
 
 void get_shm(void)
@@ -113,8 +111,9 @@ void get_shm(void)
     sop.sem_op = 1;
     semop(sem_id, &sop, 1);
 
-    // detach share memory
-    shmdt(shm_ptr);
+    // delete shared memory
+    shmctl(SHM_KEY, IPC_RMID, NULL);
+    printf("Deleted shared memory.\n");
 }
 
 int main(void)
@@ -123,12 +122,12 @@ int main(void)
 
     if (fork_ret == 0)
     {
-        sleep(1);
-        get_shm();
+        create_shm();
     }
     else
     {
-        create_shm();
+        sleep(1);
+        get_shm();
     }
 
     return (EXIT_SUCCESS);
